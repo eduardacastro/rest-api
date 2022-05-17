@@ -30,9 +30,35 @@ func getBooks(c *gin.Context) {
 // Gin Context: It carries request details, validates and serializes JSON, and more.
 // Context.IndentedJSON: serialize the struct into JSON and add it to the response.
 
+func postBooks(c *gin.Context) {
+	var newBook book
+
+	if err := c.BindJSON(&newBook); err != nil {
+		return
+	}
+
+	books = append(books, newBook)
+	c.IndentedJSON(http.StatusOK, books)
+}
+
+func getBookByID(c *gin.Context) {
+	id := c.Param("id")
+
+	for _, a := range books {
+		if a.ID == id {
+			c.IndentedJSON(http.StatusOK, a)
+			return
+		}
+	}
+
+	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "book not found"})
+}
+
 func main() {
 	router := gin.Default()
 	router.GET("/books", getBooks)
+	router.POST("/books", postBooks)
+	router.GET("/books/:id", getBookByID)
 
 	router.Run("localhost:8080")
 }
